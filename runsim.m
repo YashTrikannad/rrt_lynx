@@ -22,10 +22,10 @@ map = loadmap('example_map.txt');
 %% Run the simulation
 
 % Solve the path problem using A*
-[path, num] = astar();
+% [path, num] = astar();
 
 % OR Solve the path problem using RRT
-%[path] = rrt();
+[path] = rrt();
 
 profile off
 
