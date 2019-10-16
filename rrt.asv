@@ -131,7 +131,7 @@ while(curr_iter < max_iterations)
           straight_path = [straight_path; goal_tree(i).q];
        end
        
-       path = [flip(reverse_path) straight_path];
+       path 
           
     end
     
