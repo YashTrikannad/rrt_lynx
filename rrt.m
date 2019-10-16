@@ -12,8 +12,9 @@ function [path] = rrt(map, start, goal)
 
 %% RRT Parameters
 
+load 'robot.mat' robot
+
 max_iterations = 10000;
-max_resolution 
 
 lower_limits = robot.lowerLim;
 upper_limits = robot.upperLim;
@@ -21,33 +22,44 @@ upper_limits = robot.upperLim;
 %% RRT Algorithm
 path = [];
 
+% struct array containing nodes where each node has:
+% id -  index of the node(redundant)
+% parent - parent of the node(parent node of the edge)
+% q - configuration (Only first 3 joint variables)
+
+% start_tree contains all the nodes in start tree
 start_tree(1).id = 1;
 start_tree(1).parent = -1;
 start_tree(1).q = [start(1, 1) start(1, 2) start(1, 3)];
 
+% goal_tree contains all the nodes in goal tree
 goal_tree(1).id = 1;
 goal_tree(1).parent = -1;
 goal_tree(1).q = [goal(1, 1) goal(1, 2) goal(1, 3)];
 
-
+% Only used for stopping the program for getting stuck in the loop for too
+% long
 curr_iter = 0;
+
+% curr_start_index - the current index (also id) of the start tree
+% node
 curr_start_index = 2;
+
+% curr_goal_index - the current index (also id) of the goal tree
+% node
 curr_goal_index = 2;
 
 while(curr_iter < max_iterations)
    
     %% Generate random q  
     % Currently using naive randome sampling
-    curr_q = [lower_limits(1, 1)*rand(1) 
-              lower_limits(1, 2)*rand(1)
-              lower_limits(1, 3)*rand(1)] ;
+    curr_q = [lower_limits(1, 1)*rand(1) lower_limits(1, 2)*rand(1) lower_limits(1, 3)*rand(1)] ;
     
-    is_collided = false;
+    % No. of times the current configuration has been added to any of trees
     n_times_added = 0; 
     
     %% Check for Collision
-    is_collided = isRobotCollided([curr_q(1, 1) curr_q(1, 2) curr_q(1, 3) 
-                     start(1, 4) start(1, 5) start(1, 6)]);
+    is_collided = isRobotCollided([curr_q(1, 1) curr_q(1, 2) curr_q(1, 3) start(1, 4) start(1, 5) start(1, 6)], map);
    
     if is_collided == true
         continue;
@@ -58,7 +70,7 @@ while(curr_iter < max_iterations)
     
     closest_distance = Inf;
     for i = 1:curr_start_index
-        current_distance = norm(curr_q - start_tree(i).value);
+        current_distance = norm(curr_q - start_tree(i).q);
         if(current_distance < closest_distance)
             closest_distance = current_distance;
             closest_index = i;
@@ -68,7 +80,12 @@ while(curr_iter < max_iterations)
     %% Do Collision Checking on the entire segment
     interpolated_points = interpolate(curr_q, start_tree(closest_index).q);
     for i = 1:interpolated_points.size()
-        if(isRobotCollided == true)
+        if(isRobotCollided([interpolated_points(i, 1) 
+                interpolated_points(i, 2)
+                interpolated_points(i, 3) 
+                start(1, 4) 
+                start(1, 5) 
+                start(1, 6)],  map) == true)
             is_collided = true;
             break;
         end
@@ -86,7 +103,7 @@ while(curr_iter < max_iterations)
     closest_index = 0;             
     closest_distance = Inf;
     for i = 1:curr_goal_index
-        current_distance = norm(curr_q - goal_tree(i).value);
+        current_distance = norm(curr_q - goal_tree(i).q);
         if(current_distance < closest_distance)
             closest_distance = current_distance;
             closest_index = i;
@@ -113,7 +130,10 @@ while(curr_iter < max_iterations)
     %% Check if both the previous conditions were satisfied
     if(n_times_added == 2)
        
+       % Contains the path back tracked from the intermediate node to start
        reverse_path = []; 
+       
+       % Contains the path back tracked from the intermediate node to goal
        straight_path = []; 
        %% Path Found 
        fprintf("Start and Goal trees connected"); 
@@ -132,9 +152,10 @@ while(curr_iter < max_iterations)
        end
        
        path = [flip(reverse_path) straight_path];
-          
+       break;
     end
     
+    curr_iter = curr_iter + 1;
 end
 
 end

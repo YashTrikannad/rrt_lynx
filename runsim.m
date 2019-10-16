@@ -25,7 +25,7 @@ map = loadmap('example_map.txt');
 % [path, num] = astar();
 
 % OR Solve the path problem using RRT
-[path] = rrt();
+[path] = rrt(map, start, goal);
 
 profile off
 

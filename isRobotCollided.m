@@ -1,4 +1,4 @@
-function [isCollided] = isRobotCollided(q, map, robot)
+function [isCollided] = isRobotCollided(q, map)
 % ISROBOTCOLLIDED Detect if a configuration of the Lynx is in collision
 %   with any obstacles on the map.
 %
