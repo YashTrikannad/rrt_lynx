@@ -14,7 +14,7 @@ function [Q] = interpolate(q_curr, q_near)
 % q_curr = [-100 0 0]
 % q_near = [200 10 1]
 
-Q = []
+Q = [];
 for i=1:19
     x = q_curr(1) + i*(q_near(1) - q_curr(1))/20;
     y = q_curr(2) + i*(q_near(2) - q_curr(2))/20;

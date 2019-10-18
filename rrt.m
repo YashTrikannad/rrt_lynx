@@ -69,7 +69,7 @@ while(curr_iter < max_iterations)
     closest_index = 0;             
     
     closest_distance = Inf;
-    for i = 1:curr_start_index
+    for i = 1:curr_start_index-1
         current_distance = norm(curr_q - start_tree(i).q);
         if(current_distance < closest_distance)
             closest_distance = current_distance;
@@ -79,7 +79,7 @@ while(curr_iter < max_iterations)
     
     %% Do Collision Checking on the entire segment
     interpolated_points = interpolate(curr_q, start_tree(closest_index).q);
-    for i = 1:interpolated_points.size()
+    for i = 1:size(interpolated_points, 1)
         if(isRobotCollided([interpolated_points(i, 1) 
                 interpolated_points(i, 2)
                 interpolated_points(i, 3) 
@@ -102,7 +102,7 @@ while(curr_iter < max_iterations)
     %% Find Closest Point in the current goal tree
     closest_index = 0;             
     closest_distance = Inf;
-    for i = 1:curr_goal_index
+    for i = 1:curr_goal_index-1
         current_distance = norm(curr_q - goal_tree(i).q);
         if(current_distance < closest_distance)
             closest_distance = current_distance;
@@ -112,8 +112,13 @@ while(curr_iter < max_iterations)
     
     %% Do Collision Checking on the entire line segment
     interpolated_points = interpolate(curr_q, goal_tree(closest_index).q);
-    for i = 1:interpolated_points.size()
-        if(isRobotCollided == true)
+    for i = 1:size(interpolated_points)
+        if(isRobotCollided([interpolated_points(i, 1) 
+                interpolated_points(i, 2)
+                interpolated_points(i, 3) 
+                start(1, 4) 
+                start(1, 5) 
+                start(1, 6)],  map))
             is_collided = true;
             break;
         end
@@ -138,11 +143,11 @@ while(curr_iter < max_iterations)
        %% Path Found 
        fprintf("Start and Goal trees connected"); 
         
-       i = current_start_index;
+       i = curr_start_index;
        %% Back Trace on both trees
-       while(i ~= 1)
-          i = start_tree(i).parent;
+       while(i ~= -1)
           reverse_path = [reverse_path; start_tree(i).q];
+          i = start_tree(i).parent;
        end
        
        i = curr_goal_index;
@@ -151,11 +156,16 @@ while(curr_iter < max_iterations)
           straight_path = [straight_path; goal_tree(i).q];
        end
        
-       path = [flip(reverse_path) straight_path];
+       path = [flip(reverse_path); straight_path];
        break;
     end
     
     curr_iter = curr_iter + 1;
 end
+
+if(curr_iter == max_iterations)
+    fprintf("Path not found");
+end
+
 
 end

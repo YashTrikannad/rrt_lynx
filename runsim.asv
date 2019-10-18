@@ -14,7 +14,7 @@ profile on
 load 'robot.mat' robot
 
 start = [0,0,0,0,0,0];
-goal = [-1.4,1.0,0,0,0,0];
+goal = [1.4,0,0,0,0,0];
 
 map = loadmap('example_map.txt');
 
@@ -35,8 +35,4 @@ plotLynxPath(map,path,10);
 
 profile viewer
 
-% for i=1:size(path, 1)
-%     lynxServo(path(i, :));
-%     pause(100.0);
-% end
-
+for 
